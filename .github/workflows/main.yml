@@ -23,10 +23,7 @@ jobs:
           go-version: '^1.13.1' # The Go version to download (if necessary) and use.
       - name: Run integration tests
         run: |
-          kubectl get configmaps --all-namespaces
-          go install sigs.k8s.io/kustomize/kustomize/v3
-          export PATH=/go/bin:$PATH
-          echo $PATH
-          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          kubectl api-resources
           make install
+          kubectl api-resources
           make run
