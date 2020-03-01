@@ -1,3 +1,7 @@
 domain: aaronbatilo.dev
 repo: github.com/abatilo/replicatedconfigmap
+resources:
+- group: rcm
+  kind: ReplicatedConfigMap
+  version: v1beta1
 version: "2"

@@ -5,9 +5,14 @@ ARG OS=linux
 ARG ARCH=amd64
 ARG KUBEBUILDER_VERSION=2.3.0
 
+ENV GO111MODULE=on
+
 # Install kubebuilder
 WORKDIR /tmp
 RUN curl -Lo kubebuilder.tar.gz https://go.kubebuilder.io/dl/${KUBEBUILDER_VERSION}/${OS}/${ARCH} \
       && tar -xzvf kubebuilder.tar.gz \
-      && mv kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH}/bin/kubebuilder /usr/local/bin/kubebuilder \
+      && mv kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH}/bin/* /usr/local/bin/ \
       && rm -rf kubebuilder*
+
+# Install kustomize
+RUN go install sigs.k8s.io/kustomize/kustomize/v3

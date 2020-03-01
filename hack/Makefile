@@ -13,6 +13,6 @@ build_tools:
 
 .PHONY: tools
 tools: build_tools ## Start a shell with tools installed and the repo directory mounted
-	docker run -it --rm -v$(PWD):/src -w /src $(TOOLS_CONTAINER) bash
+	docker run -it --rm -v$(HOME)/.kube:/root/.kube:ro -v$(PWD):/src -w /src $(TOOLS_CONTAINER) bash
 	# Take ownership of any new files that came from mounting
 	sudo chown -R $(shell whoami):$(shell whoami) ../

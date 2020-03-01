@@ -1,0 +1,50 @@
+# apiVersion: v1
+# kind: Namespace
+# metadata:
+#   name: rcm-master
+---
+apiVersion: rcm.aaronbatilo.dev/v1beta1
+kind: ReplicatedConfigMap
+metadata:
+  name: rcm-asdf
+  namespace: rcm-master
+spec:
+  name: rcm-asdf
+  metadata: testing
+  data:
+    aaron: charles
+    zoe: batilo
+---
+apiVersion: rcm.aaronbatilo.dev/v1beta1
+kind: ReplicatedConfigMap
+metadata:
+  name: replicatedconfigmap-sample
+  namespace: rcm-master
+spec:
+  name: rcm-test
+  metadata: testing
+  data:
+    foo: bar
+    bar: baz
+    baz: bing
+---
+# apiVersion: v1
+# kind: Namespace
+# metadata:
+#   name: syncable
+#   annotations:
+#     rcm-sync: "true"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: syncable2
+  annotations:
+    rcm-sync: "true"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: syncable3
+  annotations:
+    rcm-sync: "true"

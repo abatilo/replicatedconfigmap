@@ -1,0 +1,53 @@
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- resources:
+  - configmap
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- resources:
+  - namespace
+  verbs:
+  - get
+  - list
+  - watch
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  creationTimestamp: null
+  name: manager-role
+  namespace: rcm-master
+rules:
+- apiGroups:
+  - rcm.aaronbatilo.dev
+  resources:
+  - replicatedconfigmaps
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - rcm.aaronbatilo.dev
+  resources:
+  - replicatedconfigmaps/status
+  verbs:
+  - get
+  - patch
+  - update
