@@ -26,5 +26,7 @@ jobs:
           kubectl get configmaps --all-namespaces
           go install sigs.k8s.io/kustomize/kustomize/v3
           export PATH=/go/bin:$PATH
+          echo $PATH
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
           make install
           make run
