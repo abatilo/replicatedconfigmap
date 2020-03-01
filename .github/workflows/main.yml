@@ -29,6 +29,6 @@ jobs:
           make run &
           sleep 180
           kubectl apply -f config/samples/rcm_v1beta1_replicatedconfigmap.yaml
-          sleep 15
+          sleep 120
           kubectl get replicatedconfigmaps
           kubectl -n syncable get configmap
