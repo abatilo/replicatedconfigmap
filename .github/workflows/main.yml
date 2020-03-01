@@ -1,0 +1,30 @@
+name: CI
+on: [push]
+
+jobs:
+  kind:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        kind-node:
+          - kindest/node:v1.16.3@sha256:bced4bc71380b59873ea3917afe9fb35b00e174d22f50c7cab9188eac2b0fb88
+          - kindest/node:v1.15.6@sha256:1c8ceac6e6b48ea74cecae732e6ef108bc7864d8eca8d211d6efb58d6566c40a
+          - kindest/node:v1.14.9@sha256:00fb7d424076ed07c157eedaa3dd36bc478384c6d7635c5755746f151359320f
+          - kindest/node:v1.13.12@sha256:ad1dd06aca2b85601f882ba1df4fdc03d5a57b304652d0e81476580310ba6289
+    steps:
+      - uses: actions/checkout@master
+      - uses: engineerd/setup-kind@v0.1.0
+        with:
+          version: v0.6.0
+          image: ${{ matrix.kind-node }}
+      - uses: actions/setup-go@v2-beta
+        with:
+          go-version: '^1.13.1' # The Go version to download (if necessary) and use.
+      - name: Run integration tests
+        working-directory: tests/integration
+        run: |
+          make test
+          export KUBECONFIG="$(kind get kubeconfig-path)"
+          kubectl version
+          kubectl get configmaps --all-namespaces
