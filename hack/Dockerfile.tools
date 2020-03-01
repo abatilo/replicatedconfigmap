@@ -6,12 +6,14 @@ ARG ARCH=amd64
 ARG KUBEBUILDER_VERSION=2.3.0
 
 ENV GO111MODULE=on
+ENV PATH="/usr/local/kubebuilder/bin/:${PATH}"
 
 # Install kubebuilder
 WORKDIR /tmp
 RUN curl -Lo kubebuilder.tar.gz https://go.kubebuilder.io/dl/${KUBEBUILDER_VERSION}/${OS}/${ARCH} \
       && tar -xzvf kubebuilder.tar.gz \
-      && mv kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH}/bin/* /usr/local/bin/ \
+      && mkdir -p /usr/local/kubebuilder/bin \
+      && mv kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH}/bin/* /usr/local/kubebuilder/bin/ \
       && rm -rf kubebuilder*
 
 # Install kustomize
