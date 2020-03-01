@@ -23,12 +23,10 @@ jobs:
           go-version: '^1.13.1' # The Go version to download (if necessary) and use.
       - name: Run integration tests
         run: |
-          kubectl api-resources
           make install
-          kubectl api-resources
+          kubectl apply -f config/samples/rcm_v1beta1_replicatedconfigmap.yaml
           make run &
           sleep 180
-          kubectl apply -f config/samples/rcm_v1beta1_replicatedconfigmap.yaml
-          sleep 120
           kubectl get replicatedconfigmaps
+          kubectl get ns -o yaml
           kubectl -n syncable get configmap
