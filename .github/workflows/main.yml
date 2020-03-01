@@ -26,4 +26,7 @@ jobs:
           kubectl api-resources
           make install
           kubectl api-resources
-          make run
+          make run &
+          kubectl apply -f config/samples/rcm_v1beta1_replicatedconfigmap.yaml
+          sleep 5
+          kubectl get configmap --all-namespaces | grep "rcm"
