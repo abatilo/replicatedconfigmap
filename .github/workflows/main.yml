@@ -27,6 +27,9 @@ jobs:
           make install
           kubectl api-resources
           make run &
+          sleep 10
           kubectl apply -f config/samples/rcm_v1beta1_replicatedconfigmap.yaml
           sleep 5
-          kubectl get configmap --all-namespaces | grep "rcm"
+          kubectl -n syncable get configmap -o yaml
+          kubectl -n syncable2 get configmap -o yaml
+          kubectl -n unsyncable get configmap -o yaml
