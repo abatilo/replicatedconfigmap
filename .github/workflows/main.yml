@@ -26,7 +26,5 @@ jobs:
           make install
           kubectl apply -f config/samples/rcm_v1beta1_replicatedconfigmap.yaml
           make run &
-          sleep 180
-          kubectl get replicatedconfigmaps
-          kubectl get ns -o yaml
-          kubectl -n syncable get configmap
+          sleep 90
+          ./hack/integration_test.sh
