@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"strings"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -48,14 +49,17 @@ type ReplicatedConfigMapReconciler struct {
 // Read/write configmaps
 // +kubebuilder:rbac:groups="",resources=configmap,verbs=get;list;watch;create;update;patch;delete
 
-var (
-	configMapOwnerKey = ".metadata.controller"
+const (
+	// MatchingAnnotation is the annotation to use to know which namespaces to operate on
+	MatchingAnnotation = "rcm-sync"
 )
 
+// Reconcile is the loop where we integrate logic for repairing expected state
 func (r *ReplicatedConfigMapReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
 	log := r.Log.WithValues("replicatedconfigmap", req.NamespacedName)
 
+	// TODO Find out if there's a way to use the `req.NamespacedName` with non-namespaced resources
 	replicatedConfigMaps := &rcmv1beta1.ReplicatedConfigMapList{}
 	if err := r.List(ctx, replicatedConfigMaps); err != nil {
 		log.Error(err, "couldn't get replicatedConfigMaps")
@@ -69,19 +73,25 @@ func (r *ReplicatedConfigMapReconciler) Reconcile(req ctrl.Request) (ctrl.Result
 		return ctrl.Result{}, err
 	}
 
+	// TODO There's MatchingFields and MatchingLabels, but it's not clear if
+	// there was an easier way to filter for namespaces with a matching
+	// annotation
+
+	// https://github.com/kubernetes-sigs/controller-runtime/blob/9f8aab6551a3ecc211b6c6078245899495b7e0f5/pkg/client/options.go#L434-L436
+	// https://github.com/kubernetes-sigs/controller-runtime/blob/9f8aab6551a3ecc211b6c6078245899495b7e0f5/pkg/client/options.go#L379-L380
 	for _, namespace := range allNamespaces.Items {
 		for k, v := range namespace.Annotations {
-			if k == "rcm-sync" && v == "true" {
+			if k == MatchingAnnotation && strings.EqualFold("true", strings.TrimSpace(v)) {
 				childNamespaces = append(childNamespaces, namespace)
 			}
 		}
 	}
 
+	// For each ReplicatedConfigMap available, loop over each syncable namespace
+	// and either create or overwrite ConfigMaps specified by the ReplicatedConfigMap
 	for _, replicatedConfigMap := range replicatedConfigMaps.Items {
 		for _, namespace := range childNamespaces {
 			objectKey := client.ObjectKey{Namespace: namespace.Name, Name: replicatedConfigMap.Spec.Name}
-
-			// Test to see if ConfigMap has already been replicated
 			configMap := &corev1.ConfigMap{}
 			if err := r.Get(ctx, objectKey, configMap); err != nil {
 				log.Info("couldn't find configmap")
@@ -111,26 +121,15 @@ func (r *ReplicatedConfigMapReconciler) Reconcile(req ctrl.Request) (ctrl.Result
 		}
 	}
 
+	// TODO Spend more time understanding how `ctrl.Result{}` and errors cause repeat loops.
+	// This implementation assumes a lot of happy path scenarios
 	return ctrl.Result{}, nil
 }
 
+// SetupWithManager registered resources that this reconciler needs to pay attention to
 func (r *ReplicatedConfigMapReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	// if err := mgr.GetFieldIndexer().IndexField(&corev1.ConfigMap{}, configMapOwnerKey, func(rawObj runtime.Object) []string {
-	// 	job := rawObj.(*corev1.ConfigMap)
-	// 	owner := metav1.GetControllerOf(job)
-	// 	if owner == nil {
-	// 		return nil
-	// 	}
-
-	// 	if owner.APIVersion != rcmv1beta1.GroupVersion.String() || owner.Kind != "ReplicatedConfigMap" {
-	// 		return nil
-	// 	}
-
-	// 	return []string{owner.Name}
-	// }); err != nil {
-	// 	return err
-	// }
-
+	// TODO Learn more about FieldIndexers as used here:
+	// https://book.kubebuilder.io/cronjob-tutorial/controller-implementation.html#setup
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&rcmv1beta1.ReplicatedConfigMap{}).
 		Watches(&source.Kind{Type: &corev1.Namespace{}}, &handler.EnqueueRequestForObject{}).

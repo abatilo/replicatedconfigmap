@@ -10,10 +10,10 @@ ENV PATH="/usr/local/kubebuilder/bin/:${PATH}"
 
 # Install kubebuilder
 WORKDIR /tmp
-RUN curl -Lo kubebuilder.tar.gz https://go.kubebuilder.io/dl/${KUBEBUILDER_VERSION}/${OS}/${ARCH} \
+RUN curl -Lo kubebuilder.tar.gz "https://go.kubebuilder.io/dl/${KUBEBUILDER_VERSION}/${OS}/${ARCH}" \
       && tar -xzvf kubebuilder.tar.gz \
       && mkdir -p /usr/local/kubebuilder/bin \
-      && mv kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH}/bin/* /usr/local/kubebuilder/bin/ \
+      && mv "kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH}/bin/*" /usr/local/kubebuilder/bin/ \
       && rm -rf kubebuilder*
 
 # Install kustomize
