@@ -6,7 +6,9 @@ metadata:
   creationTimestamp: null
   name: manager-role
 rules:
-- resources:
+- apiGroups:
+  - ""
+  resources:
   - configmap
   verbs:
   - create
@@ -16,21 +18,14 @@ rules:
   - patch
   - update
   - watch
-- resources:
+- apiGroups:
+  - ""
+  resources:
   - namespace
   verbs:
   - get
   - list
   - watch
-
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  creationTimestamp: null
-  name: manager-role
-  namespace: rcm-master
-rules:
 - apiGroups:
   - rcm.aaronbatilo.dev
   resources:

@@ -39,14 +39,14 @@ type ReplicatedConfigMapReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-// +kubebuilder:rbac:groups=rcm.aaronbatilo.dev,namespace=rcm-master,resources=replicatedconfigmaps,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=rcm.aaronbatilo.dev,namespace=rcm-master,resources=replicatedconfigmaps/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=rcm.aaronbatilo.dev,resources=replicatedconfigmaps,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=rcm.aaronbatilo.dev,resources=replicatedconfigmaps/status,verbs=get;update;patch
 
 // Read only on namespaces
-// +kubebuilder:rbac:resources=namespace,verbs=get;list;watch
+// +kubebuilder:rbac:groups="",resources=namespace,verbs=get;list;watch
 
 // Read/write configmaps
-// +kubebuilder:rbac:resources=configmap,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="",resources=configmap,verbs=get;list;watch;create;update;patch;delete
 
 var (
 	configMapOwnerKey = ".metadata.controller"
