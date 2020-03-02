@@ -56,9 +56,9 @@ func (r *ReplicatedConfigMapReconciler) Reconcile(req ctrl.Request) (ctrl.Result
 	ctx := context.Background()
 	log := r.Log.WithValues("replicatedconfigmap", req.NamespacedName)
 
-	replicatedConfigMap := &rcmv1beta1.ReplicatedConfigMap{}
-	if err := r.Get(ctx, req.NamespacedName, replicatedConfigMap); err != nil {
-		log.Error(err, "couldn't get replicatedConfigMap")
+	replicatedConfigMaps := &rcmv1beta1.ReplicatedConfigMapList{}
+	if err := r.List(ctx, replicatedConfigMaps); err != nil {
+		log.Error(err, "couldn't get replicatedConfigMaps")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
@@ -77,34 +77,36 @@ func (r *ReplicatedConfigMapReconciler) Reconcile(req ctrl.Request) (ctrl.Result
 		}
 	}
 
-	for _, namespace := range childNamespaces {
-		objectKey := client.ObjectKey{Namespace: namespace.Name, Name: replicatedConfigMap.Spec.Name}
+	for _, replicatedConfigMap := range replicatedConfigMaps.Items {
+		for _, namespace := range childNamespaces {
+			objectKey := client.ObjectKey{Namespace: namespace.Name, Name: replicatedConfigMap.Spec.Name}
 
-		// Test to see if ConfigMap has already been replicated
-		configMap := &corev1.ConfigMap{}
-		if err := r.Get(ctx, objectKey, configMap); err != nil {
-			log.Info("couldn't find configmap")
-			if errors.IsNotFound(err) {
-				newConfigMap := &corev1.ConfigMap{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      replicatedConfigMap.Spec.Name,
-						Namespace: namespace.Name,
-					},
-					Data: replicatedConfigMap.Spec.Data,
-				}
+			// Test to see if ConfigMap has already been replicated
+			configMap := &corev1.ConfigMap{}
+			if err := r.Get(ctx, objectKey, configMap); err != nil {
+				log.Info("couldn't find configmap")
+				if errors.IsNotFound(err) {
+					newConfigMap := &corev1.ConfigMap{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      replicatedConfigMap.Spec.Name,
+							Namespace: namespace.Name,
+						},
+						Data: replicatedConfigMap.Spec.Data,
+					}
 
-				if err := ctrl.SetControllerReference(replicatedConfigMap, newConfigMap, r.Scheme); err != nil {
-					log.Error(err, "couldn't set controller reference")
-				}
+					if err := ctrl.SetControllerReference(&replicatedConfigMap, newConfigMap, r.Scheme); err != nil {
+						log.Error(err, "couldn't set controller reference")
+					}
 
-				if err := r.Create(ctx, newConfigMap); err != nil {
-					log.Error(err, "couldn't create new configmap")
+					if err := r.Create(ctx, newConfigMap); err != nil {
+						log.Error(err, "couldn't create new configmap")
+					}
 				}
-			}
-		} else {
-			configMap.Data = replicatedConfigMap.Spec.Data
-			if err := r.Update(ctx, configMap); err != nil {
-				log.Error(err, "couldn't update")
+			} else {
+				configMap.Data = replicatedConfigMap.Spec.Data
+				if err := r.Update(ctx, configMap); err != nil {
+					log.Error(err, "couldn't update")
+				}
 			}
 		}
 	}
