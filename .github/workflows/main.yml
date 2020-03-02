@@ -2,7 +2,7 @@ name: CI
 on: [push]
 
 jobs:
-  kind:
+  integration-tests:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -31,7 +31,7 @@ jobs:
           make run &
           sleep 90
           ./hack/integration_test.sh
-  unit:
+  unit-tests:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
